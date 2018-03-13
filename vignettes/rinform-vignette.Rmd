@@ -1,0 +1,2216 @@
+---
+title: "The _rinform_ Package"
+author: "Gabriele Valentini"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true # table of content true
+    toc_depth: 2  # upto three depths of headings (specified by #, ## and ###)
+    toc_float: true    
+    number_sections: true  ## if you want number sections at each table header
+    theme: yeti  # many options for theme, this one is my favorite.
+    highlight: tango  # specifies the syntax highlighting style
+  pdf_document:
+    highlight: null
+    number_sections: yes    
+bibliography: vignette.bibtex
+vignette: >
+  %\VignetteIndexEntry{The rinform Wrapper}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(rinform)
+```
+
+[![Travis-CI Build Status](https://travis-ci.org/ELIFE-ASU/rinform.svg?branch=master)](https://travis-ci.org/ELIFE-ASU/rinform) [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/oanb720jqsyf8n8s?svg=true)](https://ci.appveyor.com/project/gvalentini85/rinform) [![codecov](https://codecov.io/gh/ELIFE-ASU/rinform/branch/master/graph/badge.svg)](https://codecov.io/gh/ELIFE-ASU/rinform)
+
+
+An R wrapper for the [Inform v1.0.0](https://elife-asu.github.io/Inform/) C library
+developed by [_Douglas G. Moore_](http://dglmoore.com/) for performing information
+analysis of complex system. As for the Inform library, _rinform_ is structured around
+the concepts of:
+
+* discrete empirical probability distributions which form the basis for
+  all of the information-theoretic measures,
+* classic information-theoretic measures built upon empirical distributions,
+* measures of information dynamics for time series.
+
+In addition to the core components, rinform also provides a small collection of utilities to deal with time series.
+
+If you are using _rinform_, consider citing the following articles:
+
+* D.G. Moore, G. Valentini, S.I. Walker, M. Levin. "Inform: Efficient 
+Information-Theoretic Analysis of Collective Behaviors". _Frontiers in Robotics & AI.
+(_under review_)
+* D.G. Moore, G. Valentini, S.I. Walker, M. Levin. "Inform: A Toolkit for
+Information-Theoretic Analysis of Complex Systems". In: _Proceedings of the 
+2017 IEEE Symposium Series on Computational Intelligence, Symposium on 
+Artificial Life_, IEEE Press, 2017. (_in press_)
+
+__Acknowledgement:__ This project was supported in part by the grant _Emergent computation in
+collective decision making by the crevice-dwelling rock ant Temnothorax
+rugatulus_ provided by the National Science Foundation (NSF grant PHY-1505048).
+
+# Getting Started
+
+## Installation
+
+The _rinform_ package includes some C code, that is, the sources of the _Inform_
+library. You may need some extra tools to install _rinform_ as they are required
+to compile the _Inform_ source (e.g.,
+[Xcode](https://developer.apple.com/xcode/downloads/) for Mac users,
+[Rtools](http://cran.us.r-project.org/bin/windows/Rtools/) for Windows users)
+
+### Installation from CRAN
+
+__Disclaimer: rinform is not yet on CRAN!__
+
+To install _rinform_ directly from the CRAN repository you will simply need to
+type:
+```{r eval = FALSE}
+install.packages("rinform")
+```
+
+Once installed, you can load _rinform_ prior to use it with:
+```{r eval = FALSE}
+library(rinform)
+```
+
+### Installation from GitHub
+
+To install _rinform_ from its [GitHub](https://github.com/ELIFE-ASU/rinform) repository
+you will need to have installed the [devtools](https://github.com/r-lib/devtools) package.
+If you don't have devtools already, you can install it with:
+```{r eval = FALSE}
+install.packages("devtools")
+```
+
+Load devtools and install the latest stable version of _rinform_ (i.e., _master_ branch):
+```{r eval = FALSE}
+library(devtools)
+install_github("ELIFE-ASU/rinform")
+```
+
+In case you need to use the development version of _rinform_, you can specify to install
+from the _dev_ branch:
+```{r eval = FALSE}
+install_github("ELIFE-ASU/rinform", ref = "dev")
+```
+
+Once installed, you can load _rinform_ prior to use it with:
+```{r eval = FALSE}
+library(rinform)
+```
+
+## Getting Help
+
+*rinform*, as its parent library [inform](https://github.com/elife-asu/inform),
+is developed to help anyone
+interested in applying information-theoretic techniques get things done
+quickly and painlessly. We cannot do that without your feedback. We host the
+project's source code and issue tracker on [Github](https://github.com/elife-asu/rinform).
+Please create an issue if you find a bug, an error in this documentation,
+or have a feature you'd like to request. Your contribution will make
+*rinform* a better tool for everyone.
+
+If you are interested in contributing to *rinform*, please contact the developers,
+and we'll get you up and running!
+
+Resources: [Source Repository](https://github.com/elife-asu/rinform) and [Issue Tracker](https://github.com/elife-asu/rinform/issues)
+
+## Related Projects
+
+### Inform Community
+
+While *rinform* is a great tool to use directly in R, significant effort has gone
+into making it easy to access the functionality of the [*inform*](https://github.com/elife-asu/inform) library directly
+using other higher level languages. Here are a few of the wrappers that are
+under active development:
+
+* _PyInform_ for Python ([repository](https://github.com/elife-asu/pyinform), [webpage](https://elife-asu.github.io/PyInform))
+* _Inform.jl_ for Julia ([repository](https://github.com/elife-asu/inform.jl), webpage: _forthcoming_)
+* _InformWolfram_ for Mathematica Wolfram Language ([repository](https://github.com/elife-asu/informwolfram), webpage: _forthcoming_)
+
+### Intellectual Relatives
+
+*Inform* and its collection of wrappers such as *rinform* were not created in an
+intellectual vacuum. Many similar projects have preceded it
+and are under active development. All of those projects have advantages and disadvantages
+compared to *Inform*. If *Inform* doesn't meet your needs, I hope you will let us know, and
+try one of these:
+
+* [JIDT: Java Information Dynamics Toolkit](https://github.com/jlizier/jidt) (Java)
+* [TRENTOOL: TRansfer ENtropy TOOLbox](https://trentool.github.io/TRENTOOL3) (Matlab)
+* [dit: discrete information theory](http://docs.dit.io) (Python)
+* [MuTE: MuTE Toolbox- The Dynamic DIrected Links Detector](https://mutetoolbox.guru) (Matlab)
+* [MVGC: Multivariate Granger Causality Toolbox](https://users.sussex.ac.uk/~lionelb/MVGC) (Matlab)
+* [ACSS: Algorithmic Complexity for Short
+    Strings](https://CRAN.R-project.org/package=acss) (R)
+* [OACC: Online Algorithmic Complexity
+    Calculator](http://complexitycalculator.com/) (web-based, R)
+
+## Copyright and Licensing
+
+Copyright © 2017-2018 ELIFE, Arizona State University. Free use of this software is granted
+under the terms of the MIT License. See the [LICENSE](https://github.com/elife-asu/rinform/blob/master/LICENSE) file for details.
+
+# Empirical Distributions {#Distributions}
+
+
+The [`Dist`](#DistClass) class provides an _empirical_ distribution,
+i.e. a histogram, representing the observed frequencies of some fixed-sized set of events.
+This class is the basis for all of the fundamental information measures provided on
+discrete probability distributions.
+
+The purpose of the [`Dist`](#DistClass) class is to make writing custom
+implementations of information-theoretic measures possible. Most of the measures implemented
+in _rinform_ use this structure at their core.
+
++--------------------+----------------------------------------------------------+
+| Type               | Functions                                                |
++====================+==========================================================+
+| Class              |[`Dist`](#DistClass)                                      |
++--------------------+----------------------------------------------------------+
+| Allocation         | [`resize`](#Resize), [`copy`](#Copy), [`infer`](#Infer), [`approximate`](#Approximate), [`uniform`](#Uniform) |
++--------------------+---------------------------------------------------------------+
+| Accessors/Mutators | [`length`](#length), [`counts`](#Counts), [`valid`](#Valid), [`get_item`](#GetItem), [`set_item`](#SetItem), [`tick`](#Tick), [`accumulate`](#Accumulate) |
++--------------------+----------------------------------------------------------+
+| Probabilities      |[`probability`](#Probability), [`dump`](#Dump)            |
++--------------------+----------------------------------------------------------+
+
+## Distribution Class {#DistClass}
+
+This class is the basis for almost all of the calculations performed via the library. It
+provides a means of managing observations and converting the observed event frequencies to
+probabilities.
+
+The distribution is, roughly, a histogram with finite support. The events are assumed to be
+mapped to the dense set of integers $\{0,1,\ldots,N-1\}$ where $N$ is the number
+of observable events. The number of observable events can be extracted with
+[`length`](#length).
+
+Whenever the size of the support or the number of observed events is zero, the distribution
+is considered invalid meaning that you can't trust any probabilities extracted from it.
+
+__Interface:__
+
+A distribution of observed event frequencies. If the parameter `n` is an integer,
+the distribution is constructed with a zeroed support of size $n$. If `n` is a vector
+of integer values, the sequence is treated as the underlying support. On the other hand,
+if `n` is a vector of floating point values, it is treated as a probability distribution
+and must sum to unity. Note, if a probability distribution is given as the underlying
+support, it will first be converted to a histogram with a precision of 9 significant figures.
+
+```r
+Dist(n)
+```
+
+__Examples:__
+
+Create an empty distribution with support size 3:
+```{r}
+Dist(3)
+```
+
+Create a distribution with 2 events, the first observed 5 times, the second
+observed 3 times:
+```{r}
+Dist(c(5, 3))
+```
+
+## Allocation
+
+### Resize {#Resize}
+
+If the distribution is `NULL`, a new distribution of the requested size is created.
+
+If the distribution already has the requested size, then the original distribution is
+returned. If the requested size is greater than the current size, then the newly observable
+events are assigned zero frequency. If the requested size is less than the current size,
+then the discarded events are lost and the observation count is adjusted accordingly.
+
+Note that the distribution cannot be reduced to size `0`. In that case the distribution is
+left unmodified.
+
+__Interface:__
+
+Resize the distribution `d` to have new support of size `n`.
+
+```r
+resize(d, n)
+```
+__Examples:__
+
+Create a distribution with size 2:
+```{r}
+d <- Dist(c(2, 13))
+d
+```
+
+Increase the size of the support to 5:
+```{r}
+d <- resize(d, 5)
+d
+```
+
+Decrease the size of the support to 3:
+```{r}
+d <- resize(d, 3)
+d
+```
+
+### Copy {#Copy}
+
+If the source distribution is `NULL`, then `NULL` is returned.
+
+__Interface:__
+
+Return a copy of the distribution `d`.
+
+```r
+copy(d)
+```
+
+__Examples:__
+
+Create a base distribution `d`:
+```{r}
+d <- Dist(c(1:5))
+d
+```
+
+Copy distribution to a different object `p`:
+```{r}
+p <- copy(d)
+p
+```
+
+### Infer {#Infer}
+
+__Interface:__
+
+Infer a distribution from a collection of observed `events`.
+
+```r
+infer(events)
+```
+
+__Examples:__
+
+Create a distribution $d = \{3/5, 2/5\}$:
+```{r}
+d <- infer(c(0, 0, 1, 0, 1))
+dump(d)
+```
+
+Create a distribution $d = \{3/8, 3/8, 2/8\}$:
+```{r}
+d <- infer(c(0, 0, 1, 0, 1, 2, 2, 1))
+dump(d)
+```
+
+### Approximate {#Approximate}
+
+__Interface:__
+
+Approximate a given probability distribution to a given tolerance.
+
+```r
+approximate(probs, tol)
+```
+
+__Examples:__
+
+Approximate a distribution with tolerance $10^{-3}$:
+```{r}
+probs <- c(0.5, 0.2, 0.3)
+d     <- approximate(probs, 1e-3)
+d$histogram
+
+probs <- c(1.0 / 3, 2.0 / 3)
+d     <- approximate(probs, 1e-3)
+d$histogram
+```
+
+### Uniform {#Uniform}
+
+__Interface:__
+
+Create a uniform distribution of a given size `n`. The support size `n` must
+define a valid support (i.e., `n` must be greater than 0).
+
+```r
+uniform(n)
+```
+__Examples:__
+
+Initialize a uniform distribution of size 3:
+```{r}
+d <- uniform(3)
+d
+
+dump(d)
+```
+
+## Accessors/Mutators
+
+### Length {#length}
+
+__Interface:__
+
+Get the size of the distribution's support. If the distribution is `NULL`, then a support
+of 0 is returned.
+
+```r
+length(d)
+```
+
+__Examples:__
+
+Size of a NULL distribution:
+```{r}
+d <- NULL
+length(d)
+```
+
+Size of a distribution with 5 elements:
+```{r}
+d <- Dist(5)
+length(d)
+```
+
+### Counts {#Counts}
+
+__Interface:__
+
+Get the total number of observations so far made.
+
+```
+counts(d)
+```
+
+__Examples:__
+
+Counts of valid distribution:
+```{r}
+dist <- Dist(c(5, 10))
+counts(dist) == 15
+```
+
+Let's modify the distribution and count again:
+```{r}
+dist <- set_item(dist, 2, 5)
+counts(dist) == 10
+```
+
+### Valid {#Valid}
+
+__Interface:__
+
+Determine whether or not the distribution is valid. In order to safely extract probabilities,
+the size of the support must be non-zero and the number of observations must be non-zero. In any
+other case, the distribution is invalid.
+
+```r
+valid(d)
+```
+
+__Examples:__
+
+Invalid distribution with 0 observations:
+```{r}
+dist <- Dist(3)
+valid(dist)
+```
+
+A (valid) distribution with a support of 5 elements:
+```{r}
+dist <- Dist(c(1:5))
+valid(dist)
+```
+
+Let's invalidate distribution by zeroing its support:
+```{r}
+dist$size <- as.integer(0)
+valid(dist)
+```
+
+### Get Item {#GetItem}
+
+__Interface:__
+
+Get the number of occurrences of a given `event`.
+
+```r
+get_item(d, event)
+```
+
+__Examples:__
+
+Get all items in a sequence from a valid distribution:
+```{r}
+dist <- Dist(c(3, 2, 1, 0))
+get_item(dist, 1) == 3
+get_item(dist, 2) == 2
+get_item(dist, 3) == 1
+get_item(dist, 4) == 0
+```
+
+### Set Item {#SetItem}
+
+__Interface:__
+
+Set the number of occurrences of a given `event`. This function manually sets the number
+of occurrences of a given `event`.  Note that the only
+restriction is that the value be positive. This means that this function can be used to
+invalidate the distribution by changing all of the event frequencies to zero.
+
+```r
+set_item(d, event, value)
+```
+
+__Examples:__
+
+Let's initialize empty distribution
+```{r}
+dist <- Dist(2)
+dist
+```
+
+Now we can set items and make it a valid distribution:
+```{r}
+dist <- set_item(dist, 1, 3)
+dist <- set_item(dist, 2, 8)
+dist
+```
+
+### Tick {#Tick}
+
+__Interface:__
+
+Increment the number of observations of a given `event` and return an updated
+copy of the distribution `d`. As an alternative to [`set_item`](#SetItem), this
+function simply increments the number of occurrences of a given event. This
+is useful when iteratively observing events.
+
+```r
+tick(d, event)
+```
+
+__Examples:__
+
+Let's creare an initial distribution:
+```{r}
+dist <- Dist(c(2, 4))
+```
+
+Now we can add an observation for each event:
+```{r}
+dist <- tick(dist, 1)
+get_item(dist, 1) == 3
+
+dist <- tick(dist, 2)
+get_item(dist, 2) == 5
+```
+
+### Accumulate {#Accumulate}
+
+__Interface:__
+
+Accumulate observations from a series. If an invalid distribution is provided, no
+events will be observed and an error will be raised. If an invalid event is
+provided, then the number of valid events to that point will be added and a
+warning will be raised.
+
+```r
+accumulate(d, events)
+```
+
+__Examples:__
+
+Let's create a valid distribution and dump it:
+```{r}
+d <- Dist(c(1, 2, 3))
+dump(d)
+```
+
+We can now accumulate events:
+```{r}
+events <- c(0, 0, 1, 0, 1)
+d <- accumulate(d, events)
+dump(d)
+```
+
+If we try to accumulate invalid events, 
+```{r}
+events <- c(0, 1, 1, 3, 1)
+d <- accumulate(d, events)
+dump(d)
+```
+only events up to the first invalid entry will be added.
+
+## Probabilities
+
+### Probability {#Probability}
+
+__Interface:__
+
+Extract the probability of an `event` from a distribution `d`. This function simply computes the
+probability of a given `event` and returns that value. 
+
+```r
+probability(d, event)
+```
+
+__Example:__
+
+Let's initialize a distribution with a support of 3:
+```{r}
+dist <- Dist(c(2, 2, 4))
+```
+
+We can compute probabilities as:
+```{r}
+probability(dist, 1) == 0.25
+probability(dist, 2) == 0.25
+probability(dist, 3) == 0.50
+```
+
+### Dump {#Dump}
+
+__Interface:__
+
+Dump the probabilities of all events to an array. This function computes the
+probabilities of all of the events in the support and return them as an array.
+
+```r
+dump(d)
+```
+
+__Example:__
+
+Let's initialize distribution and dump its probabilities:
+```{r}
+dist <- Dist(c(2, 2, 4))
+dump(dist)
+```
+
+Now we can modify the distribution and dump it again:
+```{r}
+dist <- set_item(dist, 1, 12)
+dump(dist)
+```
+
+# Shannon Information Measures
+
+The _rinform_ package provides a collection of entropy and other information measures
+defined on discrete probability distributions (see [Dist](#Distributions)).
+These functions form the core of _Inform_ as all of the time series analysis functions
+are built upon them. _rinform_ provides access to these functions in the case
+the user wants to use them outside the (already wrapped) time series measures.
+
+## Entropy
+
+Taking $X$ to be a random variable with $p_X$ a probability distribution on
+$X$, the base-$b$ Shannon entropy is defined as 
+$$
+H(X) = - \sum_{x} p_X(x) \log_b p_X(x).
+$$
+
+See [[@Shannon1948]](#References) for more details.
+
+__Interface:__
+
+Compute the base-`b` Shannon entropy of the distribution `p`.
+```r
+shannon_entropy(p, b = 2)
+```
+    
+__Example:__
+
+Compute the Shannon entropy of a uniform distribution:
+```{r}
+p <- Dist(c(1, 1, 1, 1))
+shannon_entropy(p)
+shannon_entropy(p, b = 4)
+```
+
+Compute the Shannon entropy of a non-uniform distribution:
+```{r}
+p <- Dist(c(2, 1))
+shannon_entropy(p)
+shannon_entropy(p, b = 3)
+```
+
+## Mutual Information {#MutualInformation}
+
+[Mutual information](https://en.wikipedia.org/wiki/Mutual_information) provides a
+measure of the mutual dependence between two random variables. Let $X$ and $Y$ be
+random variables with probability distributions $p_X$ and $p_Y$ respectively, and
+$p_{X,Y}$ the joint probability distribution over $(X,Y)$. The base-$b$ mutual
+information between $X$ and $Y$ is defined as
+$$
+\begin{split}
+I(X;Y) &= \sum_{x,y} p_{X,Y}(x,y) \log_b \frac{p_{X,Y}(x,y)}{p_X(x)p_Y(y)} \\
+       &= H(X) + H(Y) - H(X,Y).
+\end{split}
+$$
+Here the second line takes advantage of the properties of logarithms and the
+definition of Shannon entropy.
+
+To some degree one can think of mutual information as a measure of the
+(linear and non-linear) coorelations between random variables.
+
+See [[@Cover1991]](#References) for more details.
+
+__Interface:__
+
+Compute the base-`b` mutual information between two random variables $X$ and $Y$.
+```r
+shannon_mutual_info(p_xy, p_x, p_y, b = 2)
+```
+
+__Examples:__
+
+Compute the base-2 mutual information between two random variables:
+```{r}
+xy <- Dist(c(10, 70, 15, 5))
+x  <- Dist(c(80, 20))
+y  <- Dist(c(25, 75))
+
+shannon_mutual_info(xy, x, y)
+```
+
+## Conditional Entropy {#ConditionalEntropy}
+
+[Conditional entropy](https://en.wikipedia.org/wiki/Conditional_entropy) quantifies
+the amount of information required to describe a random variable $X$ given knowledge
+of a random variable $Y$. With $p_Y$ the probability distribution of $Y$, and
+$p_{X,Y}$ the joint distribution for $(X,Y)$, the base-$b$ conditional entropy is
+defined as
+$$
+\begin{split}
+H(X|Y) &= -\sum_{x,y} p_{X,Y}(x,y) \log_b \frac{p_{X,Y}(x,y)}{p_Y(y)} \\
+       &= H(X,Y) - H(Y).
+\end{split}
+$$  
+
+See [[@Cover1991]](#References) for more details.
+
+__Interface:__
+
+Compute the base-`b` conditional entropy given joint (`p_xy`) and marginal
+(`p_y`) distributions.
+```r
+shannon_conditional_entropy(p_xy, p_y, b = 2)
+```
+
+__Examples:__
+
+Compute the base-2 conditional entropy between two random variables:
+```{r}
+xy <- Dist(c(10, 70, 15, 5))
+x  <- Dist(c(80, 20))
+y  <- Dist(c(25, 75))
+
+shannon_conditional_entropy(xy, x)
+shannon_conditional_entropy(xy, y)
+```
+
+## Conditional Mutual Information {#ConditionalMutualInformation}
+
+
+[Conditional mutual information](https://en.wikipedia.org/wiki/Conditional_mutual_information)
+was introduced by [[@Dobrushin1959]](#References) and [[@Wyner1978]](#References)
+and approximately quantifies the average mutual information between random
+variables $X$ and $Y$ given knowledge of a third $Z$. Following the same notation
+as for the [conditional entropy](#ConditionalEntropy), the base-$b$ conditional mutual
+information is defined as
+$$
+\begin{split}
+I(X;Y|Z) &= -\sum_{x,y,z} p_{X,Y,Z}(x,y,z) \log_b
+\frac{p_{X,Y|Z}(x,y|z)}{p_{X|Z}(x|z)p_{Y|Z}(y|z)} \\
+         &= -\sum_{x,y,z} p_{X,Y,Z}(x,y,z) \log_b \frac{p_{X,Y,Z}(x,y,z)p_{Z}(z)}{p_{X,Z}(x,z)p_{Y,Z}(y,z)} \\
+         &= H(X,Z) + H(Y,Z) - H(Z) - H(X,Y,Z)
+\end{split}
+$$
+
+__Interface:__
+
+Compute the base-`b` conditional mutual information given the joint
+(`p_xyz`) and marginal (`p_xz`, `p_yz`, `p_z`) distributions.
+```r
+shannon_cond_mutual_info(p_xyz, p_xz, p_yz, p_z, b = 2)
+```
+
+__Examples:__
+
+Compute the base-2 conditional mutual information between two random variables
+given a third:
+```{r}
+xyz <- Dist(c(24, 24, 9, 6, 25, 15, 10, 5))
+xz  <- Dist(c(15, 9, 5, 10))
+yz  <- Dist(c(9, 15, 10, 15))
+z   <- Dist(c(3, 5))
+shannon_cond_mutual_info(xyz, xz, yz, z)
+```
+
+## Relative Entropy
+
+Relative entropy, also known as the Kullback-Leibler divergence, was introduced
+by Kullback and Leiber in 1951 [[@Kullback1951]](#References). Given a random
+variable $X$, two probability distributions $p_X$ and $q_X$, relative entropy
+measures the information gained in switching from the prior $q_X$ to the
+posterior $p_X$:
+$$
+D_{KL}(p_X || q_X) = \sum_x p_X(x) \log_b \frac{p_X(x)}{q_X(x)}.
+$$
+
+Many of the information measures (e.g. [mutual information](#MutualInformation), 
+[conditional entropy](#ConditionalEntropy)) amount to applications of relative
+entropy for various prior and posterior distributions.
+
+__Interface:__
+
+Compute the base-`b` relative entropy between posterior (`p`) and prior
+(`q`) distributions.
+```r
+shannon_relative_entropy(p, q, b = 2)
+```
+
+__Examples:__
+
+Compute the base-2 relative entropy between posterior and prior distributions:
+```{r}
+p <- Dist(c(4, 1))
+q <- Dist(c(1, 1))
+shannon_relative_entropy(p, q)
+shannon_relative_entropy(q, p)
+     
+p <- Dist(c(1, 0))
+q <- Dist(c(1, 1))
+shannon_relative_entropy(p, q)
+shannon_relative_entropy(q, p)
+```
+
+## Cross Entropy
+
+The [cross entropy](https://en.wikipedia.org/wiki/Cross_entropy) between
+two probability distributions $p$ and $q$ over the same support measures the
+average information needed to identify an event drawn from the set using a
+coding optimized for an "unnatural" probability distribution
+$q$, rather than the "true" distribution $p$. The cross entropy for the
+distributions $p$ and $q$ is defined as:
+$$
+\begin{split}
+H(p_{X}, q_{X}) &= -\sum_{x} p_{X}(x) \log_b q_{X}(x) \\
+        &= H(p_{X}) - D_{KL}(p_X || q_X).
+\end{split}
+$$  
+
+__Interface:__
+
+Compute the base-‘b’ Shannon cross entropy between a true distribution ‘p’ and
+an unnatural distribution ‘q’.
+```r
+shannon_cross_entropy(p, q, b = 2)
+```
+
+__Examples:__
+
+Compute the base-2 cross entropy between two distributions:
+```{r}
+p <- Dist(c(1, 0, 0))
+q <- Dist(c(2, 1, 1))
+shannon_cross_entropy(p, q)
+shannon_cross_entropy(q, p)
+shannon_cross_entropy(p, q, b = 3)
+shannon_cross_entropy(q, p, b = 3)
+```
+
+# Time Series Measures
+
+The original purpose of [*Inform*](https://github.com/elife-asu/inform/) was to
+analyze time series data. This explains why most of
+*Inform*'s functionality resides in functions specifically optimized for analyzing time
+series. Many information measures have "local" variants which compute a time series of point-wise
+values. These feature is directly inherited by the *rinform* wrapper.
+
+We have been meticulous in ensuring that function and parameter names are consistent
+across measures. If you notice some inconsistency, please
+[report it as an issue](https://github.com/elife-asu/rinform/issues).
+
+## Notation
+
+Throughout the discussion of time series measures, we will try to use a consistent notation.
+We will denote random variables as $X,Y,\ldots$, and let $x_i,y_i,\ldots$
+represent the $i$-th time step of a time series drawn from the associated random
+variable. Many of the measures consider $k$-histories (a.k.a $k$-blocks) of the
+time series, e.g.
+$$x_i^{(k)} = \left\{x_{i-k+1}, x_{i-k+2},\ldots,x_i\right\}$$.
+
+When denoting probability distributions, we will only make the random variable explicit in
+situations where the notation is ambiguous. We will typically write $p(x_i)$,
+$p(x_i^{(k)})$, and $p(x_i^{(k)}, x_{i+1})$ to denote the empirical probability
+of observing the $x_i$ state, the $x_i^{(k)}$ $k$-history, and the joint
+probability of observing $\left(x_i^{(k)}, x_{i+1}\right)$.
+
+## Implementation Details
+
+### The Base: States and Logarithms
+The word "base" has two different meanings in the context of information measures on time
+series. It could refer to the base of the time series itself, that is the number of unique
+states in the time series. For example, the time series $\{0,2,1,0,0\}$ is a base-3
+time series. On the other hand, it could refer to the base of the logarithm used in
+computing the information content of the inferred probability distributions. The problem is
+that these two meanings clash. The base of the time series affects the range of values the
+measure can produce, and the base of the logarithm represents a rescaling of those values.
+
+In the *rinform* wrapper we deal with this by *always* using base-2 logarithms and automatically
+computing the base of each time series internally to the wrapper. All of this ensures that
+the library is a simple as reasonably possible.
+
+### Multiple Variables, Initial Conditions, and Time Steps
+
+You generally need *a lot* of data to infer a probability distribution.  An experimentalist
+or simulator might then collect data over multiple trials or _initial conditions_. Generally, this process also involves a large number of _variables_.  Most of
+_rinform_'s time series measures allow the user to pass in a two-dimensional matrix
+with each column representing a time series from a different initial condition and/or
+variable. From this the probability distributions are inferred, and the desired value
+is calculated. This has the downside of requiring that the user store all of the
+data in memory, but it has the advantage of being fast and simple.
+
+Time series measures provided by _rinform_ accept as arguments Vector and Matrix objects.
+A Vector, for example,
+```{r}
+xs <- c(1, 0, 0, 1, 0, 0, 1, 1)
+xs
+```
+defines one time series and its length defines the number of time steps, $m$. Specifically,
+it defines one initial condition or trial for one variable. The user can deal with
+multiple variables, $l$, and multiple initial conditions, $n$, using Matrix objects
+with $l*n$ columns and $m$ rows:
+```{r}
+l <- 2
+n <- 2
+m <- 5
+xs <- matrix(sample(0:1, m * l * n, TRUE), nrow = m, ncol = l * n)
+xs
+```
+where each column represents a different time series, possibly from different variables. 
+
+When possible, _rinform_'s functions infer the number of variables, $l$, the number
+of initial conditions, $n$, and the number of time steps $m$ from the provided data
+structures. This is possible in most cases due to the fact that all time series must
+have the same number of initial conditions and time steps. If this is not the case,
+the _rinform_'s API will explicity require the user to specify the number of
+variables $l$. 
+
+## Active Information {#ActiveInformation}
+
+Active information (AI) was introduced in [[@Lizier2012]](#References) to quantify information
+storage in distributed computations. Active information is defined in terms of a
+temporally local variant
+
+$$
+a_{X,i}(k) = \log_2{\frac{p(x_i^{(k)}, x_{i+1})}{p(x_i^{(k)})p(x_{i+1})}},
+$$
+
+where the probabilities are constructed empirically from the _entire_ time series.
+From the local variant, the temporally global active information is defined as
+
+$$
+A_X(k) = \langle a_{X,i}(k) \rangle_i
+       = \sum_{x_i^{(k)},x_{i+1}} p(x_i^{(k)},x_{i+1}) \log_2{\frac{p(x_i^{(k)}, x_{i+1})}{p(x_i^{(k)})p(x_{i+1})}}.
+$$
+
+Strictly speaking, the local and average active information are defined as
+
+$$
+a_{X,i} = \lim_{k\rightarrow \infty}a_{X,i}(k)
+\qquad \textrm{and} \qquad
+A_X = \lim_{k\rightarrow \infty}A_X(k),
+$$
+
+but we do not provide yet limiting functionality in this library
+([GitHub issues](https://github.com/elife-asu/Inform/issues/24)).
+
+__Interface:__
+
+Compute the average or local active information with a history length `k`.
+
+```r
+active_info(series, k, local = FALSE)
+```
+
+__Examples:__
+
+Compute Active Information with one initial condition:
+```{r}
+series <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+active_info(series, k = 2)
+```
+and local variant:
+```{r}
+lai <- active_info(series, k = 2, local = T)
+t(lai)
+```
+
+Compute Active Information with two initial conditions:
+```{r}
+series      <- matrix(nrow = 9, ncol = 2)
+series[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+series[, 2] <- c(1, 0, 0, 1, 0, 0, 1, 0, 0)
+active_info(series, k = 2)
+```
+and local variant:
+```{r}
+lai <- active_info(series, k = 2, local = T)
+t(lai)
+
+```
+
+## Block Entropy {#BlockEntropy}
+
+Block entropy, also known as $N$-gram entropy [[@Shannon1948]](#References),
+is the standard Shannon entropy of the $k$-histories of a time series:
+$$
+H(X^{(k)}) = -\sum_{x_i^{(k)}} p(x_i^{(k)}) \log_2{p(x_i^{(k)})}
+$$
+which reduces to the traditional Shannon entropy for $k = 1$.
+
+__Interface:__
+
+Compute the average or local block entropy of a time series with block size `k`.
+
+```r
+block_entropy(series, k, local = FALSE)
+```
+__Examples:__
+
+Compute Block Entropy with one initial condition and history lenght $k \in \{1, 2\}$:
+```{r}
+series <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+block_entropy(series, k = 1)
+
+block_entropy(series, k = 2)
+```
+and local variant:
+```{r}
+be <- block_entropy(series, k = 1, local = T)
+t(be)
+
+be <- block_entropy(series, k = 2, local = T)
+t(be)
+```
+
+Compute Block Entropy with two initial conditions and history lenght $k = 2$:
+```{r}
+series      <- matrix(nrow = 9, ncol = 2)
+series[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+series[, 2] <- c(1, 0, 0, 1, 0, 0, 1, 0, 0)
+block_entropy(series, k = 2)
+```
+and local variant:
+```{r}
+be <- block_entropy(series, k = 2, local = T)
+t(be)
+```
+
+## Conditional Entropy
+
+[Conditional entropy](https://en.wikipedia.org/wiki/Conditional_entropy) is a measure of the
+amount of information required to describe a random variable $Y$ given knowledge of
+another random variable $X$. When applied to time series, two time series are used to
+construct the empirical distributions and the conditional entropy is given 
+$$
+H(Y|X) = - \sum_{x_i,y_i} p(x_i,y_i) \log_2{p(y_i|x_i)}.
+$$
+
+This can be viewed as the time-average of the local conditional entropy
+$$
+h_i(Y|X) = -\log_2{p(y_i|x_i)}.
+$$
+See [[@Cover1991]](#References) for more information.
+
+__Interface:__
+
+Compute the average and local conditional entropy between two time series.
+
+This function expects the *condition* to be the first argument, `xs`. It is expected that
+each time series be the same length `n`, but may have different bases.
+
+```r
+conditional_entropy(xs, ys, local = FALSE)
+```
+
+__Examples:__
+
+Compute Conditional Entropy between two time series:
+```{r}
+xs <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1)
+ys <- c(0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+conditional_entropy(xs, ys)
+
+conditional_entropy(ys, xs)
+```
+and local variant:
+```{r}
+ce <- conditional_entropy(xs, ys, local = T)
+t(ce)
+
+ce <- conditional_entropy(ys, xs, local = T)
+t(ce)
+```
+
+## Cross Entropy
+
+[Cross entropy](https://en.wikipedia.org/wiki/Cross_entropy) between two distributions
+$p_X$ and $q_X$ measures the amount of information needed to identify events
+using a coding scheme optimized for $q_X$ when $p_X$ is the "real" distribution
+over $X$.
+$$
+H(p,q) = -\sum_{x} p(x) \log_2{q(x)}
+$$
+Cross entropy's local variant is equivalent to the self-information of $q_X$ and as
+such is implemented by the [local block entropy](#BlockEntropy).
+
+See [[@Cover1991]](#References) for more details.
+
+__Interface:__
+
+Compute the cross entropy between the "true" and "unnatural" distributions $p_X$ and
+$q_X$ from associated time series `ps` and `qs`, respectively.
+
+```r
+cross_entropy(ps, qs)
+```
+
+__Examples:__
+
+Compute Cross Entropy between two time series: 
+```{r}
+ps <- c(0, 1, 1, 0, 1, 0, 0, 1, 0, 0)
+qs <- c(0, 0, 0, 0, 0, 1, 1, 0, 0, 1)
+
+cross_entropy(ps, qs)
+
+cross_entropy(qs, ps)
+```
+
+## Effective Information {#EffectiveInformation}
+
+Effective information is a _causal_ measure aimed at teasing out the causal structure of a
+dynamical system. In essence, it is the mutual information between an "intervention"
+distribution — a probability distribution over initial states — and the distribution after
+one time step:
+$$
+EI(A,p) = I(p,p^TA)
+$$
+where $A$ is the transition probability matrix and $p$ an intervention distribution.
+Functionality to construct a transition probability matrix from time series is
+provided by the [series_to_tpm](#TimeSeriestToTPM) function.
+
+See [[@Tononi2003]](#References), [[@Hoel2013]](#References) or [[@Hoel2017]](#References)
+for more information.
+
+__Interface:__
+
+Compute the effective information from an $n \times n$ transition probability matrix
+`tpm` given an intervention distribution `inter`. If `inter` is `NULL`, then the
+uniform distribution over the $n$ states is used.
+
+```r
+effective_info(tpm, inter = NULL)
+```
+__Examples:__
+
+Compute Effective Information with a uniform intervention distribution:
+```{r}
+tpm      <- matrix(0, nrow = 2, ncol = 2)
+tpm[, 1] <- c(0.50, 0.5)
+tpm[, 2] <- c(0.25, 0.75)
+effective_info(tpm, NULL)
+```
+
+Compute Effective Information with a non-uniform intervention distribution:
+```{r}
+tpm      <- matrix(0, nrow = 2, ncol = 2)
+tpm[, 1] <- c(0.50, 0.5)
+tpm[, 2] <- c(0.25, 0.75)
+inter    <- c(0.488372, 0.511628)
+effective_info(tpm, inter)
+```
+
+## Entropy Rate {#EntropyRate}
+
+[Entropy rate](https://en.wikipedia.org/wiki/Entropy_rate) quantifies the amount of
+information needed to describe the next state of $X$ given observations of
+$X^{(k)}.$  In other wrods, it is the entropy of the time series conditioned on the
+$k$-histories.  The local entropy rate
+$$
+h_{X,i}(k) = \log_2{\frac{p(x_i^{(k)}, x_{i+1})}{p(x_i^{(k)})}}.
+$$
+can be averaged to obtain the global entropy rate
+$$
+H_X(k) = \langle h_{X,i}(k) \rangle_i
+       = \sum_{x_i^{(k)},x_{i+1}} p(x_i^{(k)},x_{i+1}) \log_2{\frac{p(x_i^{(k)}, x_{i+1})}{p(x_i^{(k)})}}.
+$$
+
+Much as with [active information](#ActiveInformation), the local and average entropy rates are
+formally obtained in the limit
+$$
+h_{X,i} = \lim_{k\rightarrow \infty}h_{X,i}(k)
+\qquad \textrm{and} \qquad
+H_X = \lim_{k\rightarrow \infty}H_X(k),
+$$
+
+but we do not provide yet limiting functionality in this library
+([GitHub issues](https://github.com/elife-asu/Inform/issues/24)).
+
+See [[@Cover1991]](#References) for more details.
+
+__Interface:__
+
+Compute the average or local entropy rate with a history length `k`.
+
+```r
+entropy_rate(series, k, local = FALSE)
+```
+
+__Examples:__
+
+Compute the Entropy Rate for one initial condition:
+```{r}
+series <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+entropy_rate(series, k = 2)
+```
+and local variant:
+```{r}
+er <- entropy_rate(series, k = 2, local = T)
+t(er)
+```
+
+Compute the Entropy Rate for two initial conditions:
+```{r}
+series      <- matrix(nrow = 9, ncol = 2)
+series[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+series[, 2] <- c(1, 0, 0, 1, 0, 0, 1, 0, 0)
+entropy_rate(series, k = 2)
+```
+local variant:
+```{r}
+er <- entropy_rate(series, k = 2, local = T)
+t(er)
+```
+
+## Excess Entropy {#ExcessEntropy}
+
+Formally, the excess entropy is the mutual information between two adjacent, semi-infinite
+blocks of variables:
+$$
+E_X = \lim_{k \rightarrow \infty}I[(x_{-k},\ldots,x_{-1}),(x_0,\ldots,x_{k-1})].
+$$
+Because we cannot take the limit in practice, we implement the finite form:
+$$
+E_X(k) = I[(x_{-k},\ldots,x_1),(x_0,\ldots,x_{k-1})].
+$$
+
+We can think of excess entropy as a slight generalization of [active information](#ActiveInformation) or a special case of [predictive information](#PredictiveInformation).
+
+See [[@Crutchfield2003]](#References) and [[@Feldman2003]](#References) for more details.
+
+__Interface:__
+
+Compute the average or local excess entropy from a time series with block size `k`.
+
+```r
+excess_entropy(series, k, local = FALSE)
+```
+
+__Examples:__
+
+Compute Excess Entropy for one initial condition:
+```{r}
+series <- c(0, 0, 1, 1, 0, 0, 1, 1, 0)
+excess_entropy(series, k = 2)
+```
+and local variant:
+```{r}
+ee <- excess_entropy(series, k = 2, local = TRUE)
+t(ee)
+```
+
+Compute Excess Entropy for two initial conditions:
+```{r}
+series      <- matrix(0, nrow = 9, ncol =2)
+series[, 1] <- c(0, 0, 1, 1, 0, 0, 1, 1, 0)
+series[, 2] <- c(0, 1, 0, 1, 0, 1, 0, 1, 0)
+excess_entropy(series, k = 2)
+```
+and local variant:
+```{r}
+ee <- excess_entropy(series, k = 2, local = TRUE)
+t(ee)
+```
+
+## Evidence of Integration {#EvidenceOfIntegration}
+
+Evidence of Integration (EoI) was introduced in [[@Biehl2016]](#References) as a means
+of identifying representations of agents in dynamical systems. Given a collection of
+random variables, $\mathcal{X}=\{X_1,X_2,\ldots,X_l\}$, we can form (non-trivial)
+partitionings of $\mathcal{X}$:
+$$
+\{\mathcal{Z} \subset \mathcal{P}(\mathcal{X})\setminus\{\mathcal{X},\varnothing\}\ |\
+    \mathcal{Z} \not= \varnothing,
+    \bigcup_{Z \in \mathcal{Z}} Z = \mathcal{X} ~\textrm{and}~ Z_i \cap Z_j = \varnothing,
+    i \not = j
+\}
+$$
+
+Each partitioning $\mathcal{Z} = \{Z_1, \ldots, Z_m\}$ consists of a collection of
+joint random variables built from $\mathcal{X}$. The configurations of
+$\mathcal{Z}$ are in one-to-one correspondence with the configurations of
+$\mathcal{X}$. Given such a partitioning, we can ask what the pointwise mutual
+information is:
+$$
+mi_\mathcal{Z}(z_1, \ldots, z_m) = \log{\frac{p(z_1, \ldots, z_m)}{p(z_1) \ldots p(z_m)}}.
+$$
+
+If $z=\{z_1,\ldots,z_m\}$ corresponds to the configuration $x=\{x_1,\ldots,x_l\}$,
+we refer to the above mutual information as the "evidence of
+integration of $x$ with respect to the partitioning $\mathcal{Z}$".
+
+We say that a configuration $x$ is _integrated_ if and only if the evidence of
+integration of $x$ is positive for all partitionings of the system.
+
+__Interface:__
+
+Given a sequence of $n$ observed states of $l$ random variables (`series`),
+compute the evidence of integration for each partitioning of the $l$ variables, and
+return the minimum and maximum evidence for each observation. If the number of
+variables $l$ is large, the user can test a small subset of the
+partitioning schemata by providing a partitioning `parts` to increase confidence that the
+system is integrated. In this case, the function computes and returns the
+evidence of integration for each observation with respect to the partitioning `parts`.
+```r
+integration_evidence(series, parts = NULL)
+
+```
+
+__Examples:__
+
+Compute Evidence of Integration of three time series:
+```{r}
+series      <- matrix(0, nrow = 10, ncol = 3)
+series[, 1] <- c(0, 1, 0, 1, 1, 1, 0, 0, 1, 0)
+series[, 2] <- c(0, 1, 0, 1, 1, 1, 0, 0, 1, 0)
+series[, 3] <- c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0)
+integration_evidence(series)
+```
+
+Compute Evidence of Integration for the same three time series but only for the
+partitionning `c(1, 1, 2)`:
+```{r}
+parts <- c(1, 1, 2)
+integration_evidence(series, parts)
+```
+
+## Information Flow {#InformationFlow}
+
+Information flow (IF) was introduced by Ay and Polani as a measure of the "strength of a
+causal effect" [[@Ay2008]](#References). Unlike many of the other measures in _rinform_,
+information flow was designed around interventions. Rather than allowing dynamics
+to progress naturally, some subset of the random variables are forced into a particular
+state. If no interventions are performed, then IF reduces to
+[Conditional Mutual Information](https://en.wikipedia.org/wiki/Conditional_mutual_information).
+
+Practially, there is no way for _rinform_ to know from time series whether or not any
+interventions have actually been performed upon the system. As such, the onous is on the
+user to determine whether this function is in-fact computing Ay and Polani's information
+flow.
+
+In accordance with [[@Ay2008]](#References), information flow is defined as
+$$
+I_p(X \rightarrow Y | Z) = \sum_{x,y,z} p(z)p(x|\hat{z})p(y|\hat{x},\hat{z})
+    \log{
+        \frac{p(y|\hat{x},\hat{z})}
+        {\sum_{x^\prime} p(x^\prime|\hat{z})p(y|\hat{x}^\prime,\hat{z})}
+    }
+$$
+
+All probabilities are estimated from sequences of observations — the order of those
+sequences is irrelevant. A [future version of _Inform_](https://github.com/elife-asu/inform/issues/76), and thereafter _rinform_, will allow the user to specify intervention distributions.
+
+__Interface:__
+
+Compute the information flow from `lsrc` time series `src` to another `ldst`
+time series `dst`. Optionally, the user can specify `lback` background time series
+`back` to conditioning probabilities.
+
+
+```r
+info_flow(src, dst, back = NULL, lsrc, ldst, lback = 0)
+```
+
+__Examples:__
+
+This example demonstrates how to user `info_flow` to analyzed Ay and Polani's
+diamond structure example, p.28-29 in [[@Ay2008]](#References). In this example, we
+have four interacting Boolean variables $W$, $X$, $Y$ and $Z$. The variables $X$ and
+$Y$ are each dependent on $W$: they simply copy it's state. The $Z$ variable
+is the XOR of the states of $X$ and $Y$. The variable $W$ is uniformly
+distributed.
+
+Left to it's own devices, this system might produce a sequence of observations
+like (natural dynamics):
+```{r}
+ws <- c(0, 0, 1, 0, 1, 1, 0, 1)
+xs <- c(0, 0, 1, 0, 1, 1, 0, 1)
+ys <- c(0, 0, 1, 0, 1, 1, 0, 1)
+zs <- c(0, 0, 0, 0, 0, 0, 0, 0)
+```
+From these we can compute the following information flows:
+$$
+I_p(X \rightarrow Y) = 1 \\
+I_p(X \rightarrow Y | W) = 0 \\
+I_p(W \rightarrow Z | Y) = 0.
+$$
+
+Our notation departs somewhat from that of [[@Ay2008]](#References) as we denote
+these as information flows despite the fact that we are not strictly intervening
+upon the system. If the user prefers, they can think of this as "intervening on 
+the system that is indistiguishable from the natural dynamics". In any case, we can
+use `info_flow` to compute the above values:
+```{r}
+info_flow(src = xs, dst = ys, lsrc = 1, ldst = 1)                      
+info_flow(src = xs, dst = ys, back = ws, lsrc = 1, ldst = 1, lback = 1)
+info_flow(src = ws, dst = zs, back = ys, lsrc = 1, ldst = 1, lback = 1)
+```
+
+Now, consider that we can intervene on $Y$ and force it to whichever state we so
+choose. Then we might end up with a sequence of observations as:
+```{r}
+ws <- c(0, 0, 1, 0, 1, 1, 0, 1)
+xs <- c(0, 0, 1, 0, 1, 1, 0, 1)
+ys <- c(1, 0, 1, 0, 0, 1, 1, 0)
+zs <- c(1, 0, 0, 0, 1, 0, 1, 1)
+```
+
+From these we can compute the following information flows:
+$$
+I_p(X \rightarrow Y) = 0 \\
+I_p(X \rightarrow Y | W) = 0 \\
+I_p(W \rightarrow Z | Y) = 1.
+$$
+
+In _rinform_ this looks like:
+```{r}
+info_flow(src = xs, dst = ys, lsrc = 1, ldst = 1)                      
+info_flow(src = xs, dst = ys, back = ws, lsrc = 1, ldst = 1, lback = 1)
+info_flow(src = ws, dst = zs, back = ys, lsrc = 1, ldst = 1, lback = 1)
+```
+
+## Mutual Information {#MutualInformationTS}
+
+[Mutual information](https://en.wikipedia.org/wiki/Mutual_information) (MI) is a measure of
+the amount of mutual dependence between at least two random variables. Locally, MI is
+defined as
+$$
+i_i(X_1,\ldots,X_l) = \frac{p(x_{1,i},\ldots,x_{l,i})}{p(x_{1,i})\ldots p(x_{l,i})}.
+$$
+The mutual information is then just the time average of $i_i(X_1, \ldots, X_l)$:
+$$
+I(X_1,\ldots,X_l) =
+    \sum_{x_{1,i},\ldots,x_{l,i}} p(x_{1,i},\ldots,x_{l,i}) \frac{p(x_{1,i},\ldots,x_{l,i})}{p(x_{1,i})\ldots p(x_{l,i})}.
+$$
+
+See [[@Cover1991]](#References) for more details.
+
+__Interface:__
+
+Compute the mutual information or its local variant between two or more time series.
+Each variable can have a different base.
+
+```r
+mutual_info(series, local = FALSE)
+```
+
+__Examples:__
+
+Compute the Mutual Information between two variables:
+```{r}
+xs <- matrix(c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+               0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1), ncol = 2)
+mutual_info(xs)
+```
+and local variant:
+```{r}
+mi <- mutual_info(xs, local = T)
+t(mi)
+```
+
+Compute the Mutual Information between three variables:
+```{r}
+xs <- matrix(c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+               0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,
+               1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1), ncol = 3)
+mutual_info(xs)
+```
+and local variant:
+```{r}
+mi <- mutual_info(xs, local = T)
+t(mi)
+```
+
+## Predictive Information {#PredictiveInformation}
+
+Formally, the predictive information is the mutual information between a
+finite-history and a semi-infinite future:
+$$
+P_X(k) = \lim_{l \rightarrow \infty}I[(x_{-k},\ldots,x_{-1}),(x_0,\ldots,x_{l-1})].
+$$
+Of course, we cannot take the limit in practice, so we implement the finite form:
+$$
+P_X(k,l) = I[(x_{-k},\ldots,x_1),(x_0,\ldots,x_{k-1})].
+$$
+
+We can think of [active information](#ActiveInformation) and
+[excess entropy](#ExcessEntropy) as a special cases of predictive information.
+
+See [[@Bialek2001a]](#References) and [[@Bialek2001b]](#References) for more details.
+
+__Interface:__
+
+Compute the average or local predictive information from a time series `series` with
+history length `kpast` and future length `kfuture`.
+
+```r
+predictive_info(series, kpast, kfuture, local = FALSE)
+```
+
+__Examples:__
+
+Our examples will compute the predictive information between the current time step and
+the next two time steps of a time series, $P_X(1, 2)$.
+
+One initial condition:
+```{r}
+series <- c(0, 0, 1, 1, 0, 0, 1, 1, 0)
+predictive_info(series, 1, 2)
+```
+and local variant:
+```{r}
+pi <- predictive_info(series, 1, 2, T)
+t(pi)
+```
+
+Two initial conditions:
+```{r}
+series      <- matrix(0, nrow = 9, ncol = 2)
+series[, 1] <- c(0, 0, 1, 1, 0, 0, 1, 1, 0)
+series[, 2] <- c(0, 1, 0, 1, 0, 1, 0, 1, 0)
+predictive_info(series, 1, 2)
+```
+and local variant:
+```{r}
+pi <- predictive_info(series, 1, 2, T)
+t(pi)
+```
+
+## Relative Entropy
+
+[Relative entropy](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence), also
+known as the Kullback-Leibler divergence, measures the amount of information gained in
+switching from a prior distribution $q_X$ to a posterior distribution $p_X$ over
+_the same support_:
+$$
+D_{KL}(p||q) = \sum_{x_i} p(x_i) \log_2{\frac{p(x_i)}{q(x_i)}}.
+$$
+The local counterpart is
+$$
+d_{KL,i}(p||q) = log_2{\frac{p(x_i)}{q(x_i)}}.
+$$
+Note that the average in moving from the local to the non-local relative entropy is taken
+over the posterior distribution.
+
+See [[@Kullback1951]](#References) and [[@Cover1991]](#References) for more information.
+
+__Interface:__
+
+Compute the average and local relative entropy between time series drawn
+from posterior and prior distributions, here `xs` and `ys` respectively.
+
+```r
+relative_entropy(xs, ys, local = FALSE)
+```
+
+__Examples:__
+
+Compute the average relative entropy between two time series:
+```{r}
+xs <- c(0, 1, 0, 0, 0, 0, 0, 0, 0, 1)
+ys <- c(0, 1, 1, 1, 1, 0, 0, 1, 0, 0)
+
+relative_entropy(xs, ys)
+relative_entropy(ys, xs)
+```
+and local variant:
+```{r}
+re <- relative_entropy(xs, ys, local = T)
+t(re)
+
+re <- relative_entropy(ys, xs, local = T)
+t(re)
+```
+
+## Separable Information
+
+Separable information (SI) was introduced in [[@Lizier2010]](#References) as a method
+for detecting information modification in distributed computations. Given a random
+variable $Y$ and a collection of potentially informative sources $V_Y$ (wherein
+$Y \not\in V_Y$), separable information quantifies the total information gained about
+$Y$ from seperate observations of histories of $Y$ and "transfer contributions"
+from each of the sources $X \in V_Y$. In other words, it is the sum of the
+[Active Information](#ActiveInformation) of $Y$ and the (apparent)
+[Transfer Entropy](#TransferEntropy) from each source to $Y$:
+$$
+s_{Y,i}(k) = a_{Y,i}(k) + \sum_{X \in V_Y} t_{X \rightarrow Y, i}(k),\\
+S_Y(k) = \langle s_{Y,i}(k) \rangle_i = A_Y(k) + \sum_{X \in V_Y} T_{X \rightarrow Y}(k).
+$$
+
+__Interface:__
+
+Compute the average or local separable information of `dest` given a set of sources `srcs`
+and history length `k`.
+```r
+separable_info(srcs, dest, k, local = FALSE)
+```
+
+__Examples:__
+
+Compute Separable Information for one initial condition and one source:
+```{r}
+dest <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+srcs <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+separable_info(srcs, dest, k = 2)
+```
+and local variant:
+```{r}
+si <- separable_info(srcs, dest, k = 2, local = TRUE)
+t(si)
+```
+
+Compute Separable Information for one initial condition and multiple sources:
+```{r}
+dest      <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+srcs      <- matrix(0, nrow = 9, ncol = 2)
+srcs[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+srcs[, 2] <- c(1, 1, 1, 1, 0, 0, 0, 0, 0)
+separable_info(srcs, dest, k = 2)
+```
+and local variant:
+```{r}
+si <- separable_info(srcs, dest, k = 2, local = TRUE)
+t(si)
+```
+
+Compute Separable Information for multiple initial conditions and multiple sources:
+```{r}
+dest      <- matrix(0, nrow = 9, ncol = 2)
+dest[, 1] <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+dest[, 2] <- c(1, 1, 0, 1, 1, 0, 1, 1, 0)
+srcs      <- matrix(0, nrow = 9, ncol = 4)
+srcs[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+srcs[, 2] <- c(1, 1, 1, 1, 1, 0, 1, 1, 0)
+srcs[, 3] <- c(1, 1, 1, 1, 0, 0, 0, 0, 0)
+srcs[, 4] <- c(0, 0, 0, 0, 1, 1, 1, 1, 0)
+separable_info(srcs, dest, k = 2)
+```
+and local variant:
+```{r}
+si <- separable_info(srcs, dest, k = 2, local = TRUE)
+t(si)
+```
+
+## Transfer Entropy {#TransferEntropy}
+
+[Transer entropy](https://en.wikipedia.org/wiki/Transfer_entropy) (TE) was introduced
+in [[@Schreiber2000]](#References) to quantify information transfer between an
+information source and a destination, conditioning out shared history effects. TE
+was originally formulated considering only the source and destination; however many systems
+of interest have more than just those two components. As such, it may be further necessary to
+condition the probabilities on the states of all "background" components in the system.
+These two forms are sometimes referred to as _apparent_ and _complete_ transfer entropy,
+respectively ([[Lizier2008]](#References)).
+
+Our implementation of TE allows the user to condition the probabilities on any number of
+background processes, within hardware limits. For the subsequent description, take $X$
+to be the source, $Y$ the target, $W = \{W_1, \ldots, W_l\}$ be the background processes
+against which we'd like to condition. For example, we might take the state of two nodes
+in a dynamical network as the source and target, while all other nodes in the network
+are treated as the background. Transfer entropy is then defined in terms of a
+time-local variant
+$$
+t_{X \rightarrow Y, \mathcal{W}, i}(k) =
+    \log_2{\frac{p(y_{i+1},x_i|y^{(k)}_i,W_i)}
+    {p(y_{i+1}|y^{(k)}_i,W_i)p(x_{i+1}|y^{(k)}_i,W_i)}}
+$$
+
+where $W_i = w_{1,i}, \ldots, w_{l,i}$ are the states of each of the background nodes at
+time step $i$, and the probabilities are constructed empirically from the _entire_ time
+series. From the local variant, the temporally global transfer entropy is defined as
+$$
+T_{X \rightarrow Y, \mathcal{W}}(k)
+    = \langle t_{X \rightarrow Y, \mathcal{W}, i}(k) \rangle_i
+    = \sum_{y_{i+1},y^{(k)},x_i,W_i} p(y_{i+1},y^{(k)}_i,x_i,W_i)
+    \log_2{\frac{p(y_{i+1},x_i|y^{(k)}_i,W_i)}
+    {p(y_{i+1}|y^{(k)}_i,W_i)p(x_{i+1}|y^{(k)}_i,W_i)}}.
+$$
+
+Strictly speaking, the local and average transfer entropy are defined as
+$$
+t_{X \rightarrow Y, \mathcal{W}, i}
+    = \lim_{k\rightarrow \infty} t_{X \rightarrow Y, \mathcal{W}, i}(k)
+\qquad \textrm{and} \qquad
+T_{X \rightarrow Y, \mathcal{W}}
+    = \lim_{k\rightarrow \infty} t_{X \rightarrow Y, \mathcal{W}}(k),
+$$
+
+but we do not provide yet limiting functionality in this library
+([GitHub issues](https://github.com/elife-asu/Inform/issues/24)).
+
+__Interface:__
+
+Compute the average or local transfer entropy with a history length `k` with
+the possibility to conditioning on the background `ws`.
+
+```r
+transfer_entropy(ys, xs, ws = NULL, k, local = FALSE) 
+```
+
+__Examples:__
+
+One initial condition, no background:
+```{r}
+xs <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+ys <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+transfer_entropy(xs, ys, ws = NULL, k = 2)
+```
+and local variant:
+```{r}
+te <- transfer_entropy(xs, ys, ws = NULL, k = 2, local = T)
+t(te)
+```
+
+Two initial conditions, no background:
+```{r}
+xs <- matrix(0, nrow = 9, ncol = 2)
+xs[, 1] <- c(1, 0, 0, 0, 0, 1, 1, 1, 1)
+xs[, 2] <- c(1, 1, 1, 1, 0, 0, 0, 1, 1)
+ys <- matrix(0, nrow = 9, ncol = 2)
+ys[, 1] <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+ys[, 2] <- c(1, 0, 0, 0, 0, 1, 1, 1, 0)
+transfer_entropy(xs, ys, ws = NULL, k = 2)
+```
+and local variant:
+```{r}
+te <- transfer_entropy(xs, ys, ws = NULL, k = 2, local = T)
+t(te)
+```
+
+One initial condition, one background process:
+```{r}
+xs <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+ys <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+ws <- c(0, 1, 1, 1, 1, 0, 1, 1, 1)
+transfer_entropy(xs, ys, ws, k = 2)
+```
+and local variant:
+```{r}
+te <- transfer_entropy(xs, ys, ws, k = 2, local = T)
+t(te)
+```
+
+The following example is interesting in that the two background processes
+provide the same information about the destination as the source process does
+($X = W_1 \oplus W_2$) but they don't separately.
+
+One initial condition, two background processes:
+```{r}
+xs <- c(0, 1, 1, 1, 1, 0, 0, 0, 0)
+ys <- c(0, 0, 1, 1, 1, 1, 0, 0, 0)
+ws <- matrix(c(1, 0, 1, 0, 1, 1, 1, 1, 1,
+               1, 1, 0, 1, 0, 1, 1, 1, 1), ncol = 2)
+transfer_entropy(xs, ys, ws, k = 2)
+```
+and local variant:
+```{r}
+te <- transfer_entropy(xs, ys, ws, k = 2, local = T)
+t(te)
+```
+
+# Utilities
+
++--------------------------+----------------------------------------------------------+
+| Type                     | Functions                                                |
++==========================+==========================================================+
+| Binning                  |[`series_range`](#SeriesRange), [`bin_series`](#BinSeries)|
++--------------------------+----------------------------------------------------------+
+| Black-Boxing             | [`black_box`](#BlackBox), [`black_box_parts`](#BlackBoxParts) |
++--------------------------+----------------------------------------------------------+
+| Coalescing               | [`coalesce`](#Coalesce) |
++--------------------------+----------------------------------------------------------+
+| State Encoding           | [`encode`](#Encode), [`decode`](#Decode) |
++--------------------------+----------------------------------------------------------+
+| Partitioning Time Series | [`partitioning`](#PartitioningTimeSeries) |
++--------------------------+----------------------------------------------------------+
+| Time Series to TPM       | [`series_to_tpm`](#TimeSeriestToTPM) |
++--------------------------+----------------------------------------------------------+
+
+
+## Binning Time Series
+
+All of the currently implemented time series measures are only defined
+on discretely-valued time series. However, in practice continuously-valued
+time series are ubiquitous. There are two approaches to accomodating continuous values.
+
+The simplest is to bin the time series, forcing the values into discrete states.
+This method has its downsides, namely that the binning is often a bit unphysical
+and it can introduce bias. What’s more, without some kind of guiding principle it
+can be difficult to decide exactly which binning approach.
+
+The second approach attempts to infer condinuous probability distributions
+from continuous data. This is potentially more robust, but more technically d
+ifficult. Unfortunately, _rinform_ does not yet have an implementation of information
+measures on continous distributions.
+
+
+### Series Range {#SeriesRange}
+
+__Interface:__
+
+Compute the range, minimum and maximum values in a floating-point time series
+and return them as a list.
+
+```r
+series_range(series)
+```
+
+__Examples:__
+
+Find range, minimum, and maximum values of a continuous state time series:
+```{r}
+xs <- c(0.2, 0.5, -3.2, 1.8, 0.6, 2.3)
+series_range(xs)
+```
+
+### Bin Series {#BinSeries}
+
+Bin a floating-point time series following one of three different modalities:
+
+* Bin a floating-point time series into a finite-state time series with `b` uniform sized
+bins, and return the size of the bins. If the size of each bin is too small, less than
+$10 \epsilon$, then all entries are placed in the same bin and an error is set.
+($\epsilon$ is the double-precision machine epsilon.)
+* Bin a floating-point time series into bins of a specified size `step`, and return
+the number of bins. If the bin size is too small, less than $10 \epsilon$, then an error
+is set.
+* Bin a floating-point time series into bins defined by an array of `bounds`, and
+return the bounds of bins. 
+
+__Interface:__
+
+Bin a floating-point time series and return a list giving the binned sequence,
+the number of bins and either the bin sizes or bin bounds.
+     
+```r
+bin_series(series, b = NA, step = NA, bounds = NA)
+```
+
+__Examples:__
+
+First method with `b` uniformely sized bins:
+```{r}
+series <- c(1, 2, 3, 4, 5, 6)
+bin_series(series, b = 2)
+```
+
+Second method with speficied bin size `step`:
+```{r}
+bin_series(series, step = 2.0)
+```
+
+Third method with specific bin `bounds`:
+```{r}
+bin_series(series, bounds = c(3, 7))
+```
+
+## Black-Boxing Time Series
+
+It is often useful when analyzing complex systems to black-box components
+of the system by aggregating its states. This process amounts to grouping
+the states of different components of the system and treating them as a
+single state on a larger state-space and, in doing so, the black-boxed
+components are treated as a single entity, without regard for its small-scale structure.
+As an example, consider you have two Boolean random variables $X$ and $Y$, and
+you observe time series of each simultaneously:
+$$
+X:\ \{0,1,1,0,1,0,0,1\}\\
+Y:\ \{1,0,0,1,1,0,1,0\}
+$$
+
+It may be worthwhile to consider these observations as observations of the joint
+variable $(X, Y)$:
+$$
+(X,Y):\ \{(0,1),(1,0),(1,0),(0,1),(1,1),(0,0),(0,1),(1,0)\}.
+$$
+
+The joint observations can then be naturally encoded, for example, as base-4 states
+$$
+(X,Y):\ \{1,2,2,1,3,0,1,2\}.
+$$
+
+We refer this process of mapping the observations of $X$ and $Y$ to the encoded
+observations of $(X, Y)$ as black boxing. In this case, the black boxing procedure is
+performed in "space" (you might think of $X$ and $Y$ having locations in space.
+We may also black box in time. The canonical example of this is considering the
+$k$-history of a random variable:
+$$
+X:\       \{0,1,1,0,1,0,0,1\}\\
+X^{(2)}:\ \{((0,1),(1,1),(1,0),(0,1),(1,0),(0,0),(0,1)\},
+$$
+and the observations of $X^{(2)}$ can be encoded as base-4 states:
+$$
+X^{(2)}:\ \{(1,3,2,1,2,0,1\}.
+$$
+
+We provide a basic black-boxing function, [`black_box`](#BlackBox), that allows
+the user to black-box in both space and into the future and past of a collection
+of random variables. The [`black_box_parts`](#BlackBoxParts) allows the user to
+black-box time series based on a [partitioning scheme](#PartitioningTimeSeries)
+(useful in the implementation of integration measures such as
+[Evidence of Integration](#EvidenceOfIntegration).
+
+### Black-Box {#BlackBox}
+
+__Interface:__
+
+Black-box time series from a collection of `l` sources where each
+series has the same number of time steps, same number of initial conditions,
+and possibly different bases into a single time series. The base of the
+resulting time series is given by the product of the bases of each time
+series in the collection. Black-boxing can be performed in time by
+providing history lengths `r` and future lengths through `s`.
+
+```r
+black_box(series, l, r = NULL, s = NULL)
+```
+
+__Examples:__
+
+We'll black box two time series with no history and future:
+```{r}
+series      <- matrix(0, nrow = 8, ncol = 2)
+series[, 1] <- c(0, 1, 1, 0, 1, 0, 0, 1)
+series[, 2] <- c(1, 0, 0, 1, 1, 0, 1, 0)
+black_box(series, l = 2)
+```
+Note that, this is the first example described at the beginning of this section.
+
+Black-box a single time series in time with history length 2:
+```{r}
+series <- c(0, 1, 1, 0, 1, 0, 0, 1)
+black_box(series, l = 1, r = 2)
+```
+This is the second example described at the beginning of this section.
+
+Black-box two time series with histories and futures:
+```{r}
+series      <- matrix(0, nrow = 8, ncol = 2)
+series[, 1] <- c(0, 1, 1, 0, 1, 0, 0, 1)
+series[, 2] <- c(1, 0, 0, 1, 1, 0, 1, 0)
+black_box(series, l = 2, r = c(2, 1), s = c(0, 1))
+```
+
+### Black-Box Parts {#BlackBoxParts}
+
+__Interface:__
+
+Black-box time series from a collection of $l$ sources where each
+series has the same number of time steps but possibly different bases into
+a number of different time series according to the partitioning scheme `parts`.
+The resulting time series and their bases are returned. The base of the
+resulting time series is given by the product of the bases of each time
+series in the partition. 
+
+```r
+black_box_parts(series, parts)
+```
+
+__Examples:__
+
+Black-box 4 time series (each of length 8) into a single time series:
+```{r}
+xs      <- matrix(0, nrow = 8, ncol = 4)
+xs[, 1] <- c(0, 1, 1, 0, 1, 0, 0, 1)
+xs[, 2] <- c(1, 0, 0, 1, 1, 0, 1, 0)
+xs[, 3] <- c(0, 0, 0, 1, 1, 1, 0, 0)
+xs[, 4] <- c(1, 0, 1, 0, 1, 1, 1, 0)
+parts   <- c(1, 1, 1, 1)
+black_box_parts(xs, parts)
+```
+This could have been more simple using [`black_box`]($BlackBox), but it is for
+illustrative purpose.
+
+Black-box 4 time series (of length 8) into two time series using the
+partitioning scheme $(1,2,2,1)$. That is, combine the 1st and 4th, and the
+2nd and 3rd.
+```{r}
+parts   <- c(1, 2, 2, 1)
+x <- black_box_parts(xs, parts)
+x
+```
+Note that the two time series each have a base of 4, and the bases are
+returned as `$b`.
+
+Finally, in this example, we compute the multivariate mutual information
+between 4 time series (each of length 8) for all partitionings of the system
+(except the very first since that only yields a single time series).
+That is, each partition is treated as a seperate variable and
+the mutual information is computed between the partitioned variables.
+```{r}
+xs         <- matrix(0, nrow = 8, ncol = 4)
+xs[, 1]    <- c(0, 1, 1, 0, 1, 0, 0, 1)
+xs[, 2]    <- c(1, 0, 0, 1, 1, 0, 1, 0)
+xs[, 3]    <- c(0, 0, 0, 1, 1, 1, 0, 0)
+xs[, 4]    <- c(1, 0, 1, 0, 1, 1, 1, 0)
+all_parts  <- partitioning(4)
+mmi        <- rep(0, dim(all_parts)[2] - 1)
+
+for (i in 2:dim(all_parts)[2]) {
+  x          <- black_box_parts(xs, all_parts[, i])
+  mmi[i - 1] <- mutual_info(x$box)
+}
+round(mmi, 3)
+```
+
+## Coalescing Time Series {#Coalesce}
+    
+The magic of information measures is that the actual values of a time series
+are irrelavent. For example, $\{0, 1, 0, 1, 1 \}$ has the same entropy as
+$\{2, 9, 2, 9, 9\}$ (possibly up to a rescaling). This give us the freedom
+to shift around the values of a time series as long as we do not change the
+relative number of states.
+    
+This function thus provides a way of "compressing" a time series into as
+small a base as possible. Why is this useful? Many of the measures use the base
+of the time series to determine how much memory to allocate; the larger the base,
+the higher the memory usage. It also affects the overall performance as the combinatorics
+climb exponentially with the base.
+    
+Notice that the encoding that is used ensures that the ordering of the states
+stays the same, e.g.,
+$$
+\{-8 \rightarrow 0, -2 \rightarrow 1, 2 \rightarrow 2, 4 \rightarrow 3, 6 \rightarrow 4\}
+$$.
+
+__Interface:__
+
+Coalesce a timeseries into as few contiguous states as possible.
+```r
+coalesce(series)
+```
+
+__Examples:__
+
+The two standard usage cases for this function are to reduce the base of a
+time series:
+```{r}
+coalesce(c(0, 2, 0, 2, 0, 2))
+```
+
+and to ensure that the states are non-negative:
+```{r}
+coalesce(c(-8, 2, 6, -2, 4))
+```
+
+## State Encoding
+
+State encoding is a necessity when complex time series are being analyzed.
+For example, `k`-history must be encoded as an integer in order to “observe”
+it using a Dist. What if you are interested in correlating the aggragate
+state of one group of nodes with that of another? You’d need to encode
+the groups’ states as integers. The following functions provides such
+functionality.
+
+<div class="alert alert-warning">
+  <strong>Attention!</strong>
+
+  As a practical matter, these utility functions should only be used as a
+  stop-gap while a solution for your problem is implemented in the core
+  _Inform_ library and wrapped in _rinform_. “Why?” you ask? Well, these
+  functions are about as efficient as they can be for one-off state encodings,
+  but most of the time you are interested in encoding sequences of states.
+  This can be done much more efficiently if you encode the entire sequence
+  at once. You need domain-specific information to make that happen.
+</div>
+
+### Encode {#Encode}
+    
+This function uses a [big-endian](https://en.wikipedia.org/wiki/Endianness#Examples)
+encoding scheme. That is, the most significant bits of the encoded integer
+are determined by the left-most end of the unencoded state. If `b` is not provided
+(or is `NA`), the base is inferred from the state with a minimum value of 2.
+
+__Interface:__
+
+Encode a base-'b' array of integers into a single integer.
+```r
+encode(state, b = NA)
+```
+
+__Examples:__
+
+Using the big-endian encoding scheme, the most significant bits of the encoded integer
+are determined by the left-most end of the unencoded state:
+```{r}
+encode(c(0, 0, 1), b = 2)
+encode(c(0, 1, 0), b = 3)
+encode(c(1, 0, 0), b = 4)
+encode(c(1, 0, 4), b = 5)
+```
+
+If `b` is not provided or is `NA`, itt is inferred from the state:
+```{r}
+encode(c(0, 0, 2), NA)
+encode(c(0, 2, 0))
+encode(c(1, 2, 1))
+```
+
+### Decode {#Decode}
+    
+The provided encoded state is decoded using the
+[big-endian](https://en.wikipedia.org/wiki/Endianness#Examples) encoding
+scheme. Note that the base `b` must be provided, but the number of digits `n` is
+optional. If `n` is provided then the decoded state will have exactly that
+many elements. 
+    
+__Interface:__
+
+Decode an integer into a base-`b` array with `n` digits.
+```r
+decode(encoding, b, n = NA)
+```
+
+__Examples:__
+
+This function assumes a big-endian encoding scheme:
+```{r}
+decode(2, b = 2, n = 2)
+decode(6, b = 2, n = 3)
+decode(6, b = 3, n = 2)
+```
+
+If `n` is provided then the decoded state will have exactly that
+many elements. However, note that if the provided `n` is too small to contain a full
+representation of the state, an error will be raised.
+```{r}
+decode(2, b = 2, n = 4)
+```
+
+If `n` is not provided, the length of the decoded state is inferred
+from the `encoding` to be as small as possible:
+```{r}
+decode(1, b = 2)
+decode(1, b = 3)
+decode(3, b = 2)
+decode(3, b = 3)
+decode(3, b = 4)
+```
+
+## Partitioning Time Series {#PartitioningTimeSeries}
+
+Many analyses of complex systems consider partitioning the system into components or
+modules. One example of this is [Evidence of Integration](#EvidenceOfIntegration).
+
+For generality, we represent a partitioning of $N$ items into $1 \leq M \leq N$
+partitions as a sequence of integers $p_1, \ldots, p_N$ where $1 \leq p_i \leq M$
+is the partition to which the $i$-th item belongs.
+
+As an example, suppose we partitioned $\{X_1, X_2, X_3\}$ as $\{\{X_1\},
+\{X_2,X_3\}\}$. This would be represented as $(1, 2, 2)$ because $X_1$ belongs to
+the first partition and $X_2, X_3$ belong to the second partition.
+
+We provide a function, `partitioning` to facilitate the generation of all unique
+partitionings of a system of $N$ elements.
+
+__Interface:__
+
+Partition a number `n` of items into all possible different subsets. The number of
+partitions is given by the Bell number $B_n$.
+
+```r
+partitioning(n)
+```
+
+__Examples:__
+
+Say we wish to partition a set containing 3 items:
+```{r}
+partitioning(3)
+```
+
+You'll notice that the number of partitions, i.e, number of columns, is equal
+to the [Bell number](https://en.wikipedia.org/wiki/Bell_number) $B_3 = 5$.
+
+We can compute the 9-th Bell number as follows:
+```{r}
+dim(partitioning(9))[2]
+```
+
+## Time Series to TPM {#TimeSeriestToTPM}
+
+Some information measures are defined on transition probability matrices (TPM) as, for
+example, [Effective Information](#EffectiveInformation). For this reason, we provide a
+function `series_to_tpm` which estimates the one-time-step TPM from time series data.
+
+__Interface:__
+
+Estimate the one-time-step transition probability matrix $A$ from a time series.
+The element $A_{ji}$ is the probability of transitioning to state $j$ in the next
+time step given the system is in state $i$ (note the column-major convention).
+
+```r
+series_to_tpm(series)
+```
+
+__Examples:__
+
+Estimate a TPM from one time series:
+```{r}
+series <- c(0, 2, 1, 0, 1, 2, 0, 1, 2, 1, 0, 0, 2, 1, 1)
+series_to_tpm(series)
+```
+
+Estimate a TPM from multiple time series, in this case 7 2-steps series:
+```{r}
+series <- matrix(0, nrow = 2, ncol = 7)
+series[, 1] <- c(0, 0)
+series[, 2] <- c(0, 1)
+series[, 3] <- c(0, 1)
+series[, 4] <- c(0, 1)
+series[, 5] <- c(1, 0)
+series[, 6] <- c(1, 1)
+series[, 7] <- c(2, 2)
+series_to_tpm(series)
+```
+
+# References {#References}
