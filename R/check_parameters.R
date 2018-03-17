@@ -1,3 +1,9 @@
+################################################################################
+# Copyright 2017-2018 Gabriele Valentini, Douglas G. Moore. All rights reserved.
+# Use of this source code is governed by a MIT license that can be found in the
+# LICENSE file.
+################################################################################
+
 .check_series <- function (x) {
   if (!is.numeric(x)) {
     stop("<", deparse(substitute(x)), "> is not numeric!", call. = !T)
@@ -86,7 +92,7 @@
   if (!is.vector(p)) {
     stop("<", deparse(substitute(p)), "> is not a vector!", call. = !T)
   }
-  if (sum(p) != 1.0) {
+  if (!isTRUE(all.equal(sum(p), 1.0, tolerance = 1e-6))) {
     stop("<", deparse(substitute(p)), "> does not sum up to 1!", call. = !T)
   }
   if (sum(p >=  0) != length(p)) {
@@ -104,14 +110,16 @@
   if (dim(x)[1] != dim(x)[2]) {
     stop("<", deparse(substitute(x)), "> is not a square matrix!", call. = !T)
   }
-  if (prod(colSums(x) == rep(1, dim(x)[1])) != 1) {
-    stop("<", deparse(substitute(x)), ">'s columns do not sum up to 1!", call. = !T)
+  for (i in 1:dim(x)[2]) {
+    if (!isTRUE(all.equal(sum(x[, i]), 1.0, tolerance = 1e-6))) {
+      stop("<", deparse(substitute(x)), ">'s column <", i ,"> does not sum up to 1!",
+           call. = !T)
+    }
   }
   if (sum(x >= 0) != dim(x)[1] * dim(x)[2]) {
     stop("<", deparse(substitute(x)), "> contains negative values!", call. = !T)
   }  
 }
-
 
 .check_history <- function (k) {
   if (!is.numeric(k)) {
