@@ -1,7 +1,7 @@
 Package: rinform
 Title: An R Wrapper of the 'Inform' C Library for Information Analysis
         of Complex Systems
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(
       person("Gabriele", "Valentini", email = "gvalent3@asu.edu", role = c("aut", "cre", "cph")),
       person("Douglas G.", "Moore", email = "douglas.g.moore@asu.edu", role = c("ctb", "cph")))
@@ -24,10 +24,11 @@ RoxygenNote: 6.0.1.9000
 Imports: methods
 Suggests: knitr, rmarkdown, testthat, roxygen2
 VignetteBuilder: knitr
+SystemRequirements: C++11
 NeedsCompilation: yes
-Packaged: 2018-03-17 15:36:00 UTC; gabrielevalentini
+Packaged: 2018-03-26 16:26:44 UTC; gabrielevalentini
 Author: Gabriele Valentini [aut, cre, cph],
   Douglas G. Moore [ctb, cph]
 Maintainer: Gabriele Valentini <gvalent3@asu.edu>
 Repository: CRAN
-Date/Publication: 2018-03-17 23:03:53 UTC
+Date/Publication: 2018-03-26 17:22:57 UTC

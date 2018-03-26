@@ -1,7 +1,7 @@
-5249cb7e662b4e664addd93fc456099e *DESCRIPTION
+33491bfcd505fc7e098987de1d7f95f0 *DESCRIPTION
 a7ad5c050fd2eeef68bb21e921972306 *LICENSE
 36b39d1bf7b40ed35b0fab79d71fdd7f *NAMESPACE
-68c4651f734b5c829c447cf829195790 *NEWS.md
+640e75f92a728cd013c6d5336ebca1bd *NEWS.md
 b397818780e9124347543ae1bb9a8d93 *R/activeinfo.R
 bdbe61b4ceb8684b3bad61f5c0b6d5c4 *R/binning.R
 937988613cf2d97f004a62e7ca98f10a *R/blackbox.R
@@ -26,11 +26,11 @@ e3efa719a2c67b75bdf7c6c915fc76f2 *R/relativeentropy.R
 6fcca0e34448862cb4ea13a08a823c5a *R/seriestotpm.R
 5145b4a90b1078cf779012ca40f99d44 *R/shannon.R
 8358f6f4312f0d4b950c42252ec747ca *R/transferentropy.R
-57d48a96d9f27daa5c208b6c1a733b03 *README.md
+8ad9cf0b7781bb4a89d59c8a9518f50b *README.md
 7d550479cd4467d3fa4ab32cefd5cffc *build/vignette.rds
 d573847bc8cd420e7f1d533392158468 *inst/doc/rinform-vignette.R
-2ef8936c4ca05f36643898ac3739963e *inst/doc/rinform-vignette.Rmd
-86b0d9b02cfc572c2b9ea7372a634ef2 *inst/doc/rinform-vignette.html
+e4df651f3052c3f35fe32ddcf441356e *inst/doc/rinform-vignette.Rmd
+be451b487c4888ab8deaa51bd1c5f2c1 *inst/doc/rinform-vignette.html
 aacd4b37800097f06c804f69bf8b1d81 *inst/examples/ex_activeinfo.R
 8391a7ba17f3ee4bb364ef32d55f1b08 *inst/examples/ex_binning_bin_series.R
 930c3e0da5c46c03bc5de362ee56b554 *inst/examples/ex_binning_series_range.R
@@ -124,7 +124,7 @@ b4f61c4134c0325eaa89db278dbe3d5b *man/valid.Rd
 d8cac74fd59361c8192f60e5bbf1e869 *src/Makevars
 323cec56ca3df427d1e06486db36cb76 *src/Makevars.win
 e727158e81b0700b74a3055b8e84c909 *src/inform-1.0.0/LICENSE
-34a41d46b65efed823137a2a4ccb79de *src/inform-1.0.0/Makevars
+7935b03e408a8cb6d8ad0ec708c4c0df *src/inform-1.0.0/Makevars
 b8fe7d55ffd073209c0265e2420e1df2 *src/inform-1.0.0/Makevars.win
 b5cc444d7351aa8c0cfd3e5dfd840014 *src/inform-1.0.0/README.adoc
 f703f2e1ece3aa6f35e92d0bc2cd98a7 *src/inform-1.0.0/include/ginger/unit.h
@@ -175,7 +175,7 @@ dd6e6ec5543654508781b67fe9920710 *src/inform-1.0.0/src/pid.c
 75356f3b6311c979845f34785f0d3f14 *src/inform-1.0.0/src/relative_entropy.c
 26a23d2e09c5e564e5de5d87cdc063ee *src/inform-1.0.0/src/separable_info.c
 d48f562a8d7450e0195d360cda551fc7 *src/inform-1.0.0/src/shannon.c
-56e3ce6afcf3cda504d48d96ee629ebc *src/inform-1.0.0/src/transfer_entropy.c
+c2c45756b504afac2c5db5b533449127 *src/inform-1.0.0/src/transfer_entropy.c
 7ae3bd02617e0338b4d605e56301cfdf *src/inform-1.0.0/src/utilities/binning.c
 4e939e6ef6fe8225645d551ec3e16f6c *src/inform-1.0.0/src/utilities/black_boxing.c
 b233af0ce5f0e4781ae71cb2a67d27be *src/inform-1.0.0/src/utilities/coalesce.c
@@ -185,7 +185,7 @@ c75cce9123051f9e6db83057dd6d2520 *src/inform-1.0.0/src/utilities/random.c
 70e1e1cdfe1936fb4384e01a5bfd28cf *src/inform-1.0.0/src/utilities/tpm.c
 dd5ededb4f882f94ccbdee24eac5ee01 *src/rinform_active_info.c
 dd1cf54be21d78f13e2507310cd95d83 *src/rinform_binning.c
-7b12ca28d8ebdb4cb959309ce468b14a *src/rinform_black_box.c
+cf28d40731614768c4ab031c12129aa4 *src/rinform_black_box.c
 6318c1f11e35e4ffd77c24008d683022 *src/rinform_block_entropy.c
 5ed3ef68c954d974535a2dd8d719af4d *src/rinform_coalesce.c
 c6e0284360246b1005798a8f265ec5dd *src/rinform_conditional_entropy.c
@@ -198,7 +198,7 @@ f31e8e69d48834e43819e67f9f7b7a79 *src/rinform_excess_entropy.c
 451b08395d52b616148fff0fe6208539 *src/rinform_info_flow.c
 85c26e060e8ad60beb9deee09195f0f6 *src/rinform_init.c
 546c46d33dd47a891845ff7c9ad30198 *src/rinform_init.h
-c98a168ffde328fb07cf8d67449a1332 *src/rinform_integration_evidence.c
+2d3823a8958a668e31b3e5fdea885755 *src/rinform_integration_evidence.c
 d8070a1b30b20d03f4485cfea333f8bb *src/rinform_mutual_info.c
 af3e4b6b52051d1fa9328acce897b5b4 *src/rinform_partitioning.c
 b8eecfa9d4ebe122ec5485aa4d756626 *src/rinform_predictive_info.c
@@ -231,5 +231,5 @@ f915680a1c2df6f1ead5ea4c9465527d *tests/testthat/test_mutual_info.R
 fc95ccd8e026a8aed728698223d2ba4e *tests/testthat/test_series_to_tpm.R
 5d950618c5dd66fabfb5b482326292c1 *tests/testthat/test_shannon.R
 25e67b12257c328df2d40844039e8977 *tests/testthat/test_transfer_entropy.R
-2ef8936c4ca05f36643898ac3739963e *vignettes/rinform-vignette.Rmd
+e4df651f3052c3f35fe32ddcf441356e *vignettes/rinform-vignette.Rmd
 94820d6ce07f0c1dd4daacecd8a70d0d *vignettes/vignette.bibtex
